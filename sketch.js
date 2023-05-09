@@ -3,23 +3,22 @@ let team2Score = 0;
 
 let minutes = 0;
 let seconds = 0;
+let playing = false;
+let playPauseButton;
 
 let period = 1;
 
 let team1Fouls = 0;
 let team2Fouls = 0;
 
-let playing = false;
-let paused = false;
-
-let periodPlaying = false;
-
 let tieColor, looseColor, winColor;
 let colorA1, colorA2;
 
+let textModifier = 1;
+
 function setup() {
   //createCanvas(windowWidth, windowHeight);
-  frameRate(1);
+  //frameRate(1);
 
   textAlign(CENTER);
 
@@ -34,6 +33,10 @@ function setup() {
   textAlign(CENTER);
   textFont("Arial");
   textStyle(BOLD);
+  if (canvasWidth < canvasHeight){
+    textModifier = 1.3;
+    print('textModifier = 1.3!')
+  }
 
   // Definimos colores para empates y ventajas
   backgroundColor = 50;
@@ -54,6 +57,8 @@ function setup() {
   stopButton = createButton("⏹");
   stopButton.position(width / 2 + 15, 165);
   stopButton.mousePressed(stopTime);
+  
+  //print('Canvas width: '+ canvasWidth + '  Canvas height: ' + canvasHeight);
 }
 
 function draw() {
@@ -92,61 +97,66 @@ function draw() {
   strokeWeight(3);
   line(width / 2, height / 2 - 90, width / 2, height / 2 + 170);
 
-  // Mostrar los marcadores de cada equipo
+  // Mostrar los MARCADORES de cada equipo
   push();
   fill(255);
   noStroke();
-  textSize(550);
+  textSize(550/(textModifier*1.2));
   textAlign(CENTER, CENTER);
   text(team1Score, width / 4, height / 2 + 70);
   text(team2Score, (width / 4) * 3, height / 2 + 70);
   pop();
 
-  // Mostrar el tiempo del juego
+  // Mostrar el TIEMPO del juego
   push();
   noStroke();
   fill(0, 80);
-  textSize(150);
+  textSize(150/(textModifier*2));
   textAlign(CENTER, CENTER);
-  text(minutes + ":" + nf(seconds, 2), width / 2, height / 8);
+  let formattedTime = nf(minutes, 2) + ":" + nf(seconds, 2);
+  text(formattedTime, width / 2, height / 8);
   pop();
 
   push();
   noStroke();
   fill(255);
-  // Mostrar las faltas de cada equipo
+  
+  // Mostrar las FALTAS de cada equipo
   textSize(40);
   textAlign(CENTER, CENTER);
-  textSize(80);
+  textSize(80/textModifier);
   text(team1Fouls, width / 5, height / 8);
   text(team2Fouls, (width / 5) * 4, height / 8);
   textSize(25);
   text("Faltas", width / 5, height / 8 + 50);
   text("Faltas", (width / 5) * 4, height / 8 + 50);
 
-  // Mostrar el periodo actual
-  textSize(80);
+  // Mostrar el PERIODO actual
+  textSize(80/textModifier);
   textAlign(CENTER, CENTER);
   text(period, width / 2, (height / 8) * 7);
   textSize(25);
   text("PERIODO", width / 2, (height / 8) * 7 + 50);
 
   pop();
-  
-  print('MouseX: ' + mouseX + '  MouseY: ' + mouseY);
-  
+
+  //print('MouseX: ' + mouseX + '  MouseY: ' + mouseY);
+
   push();
   rectMode(CORNERS);
   fill(0);
   noFill();
   noStroke();
-  let haaight = height/17;
-  rect(width/10, haaight, width/10+width/5, haaight*3);
-  rect(width/10 *7, haaight, width/10 *9, haaight*3);
-  
-  rect(width/10, haaight, (width/10+width/5)/2, haaight*3);
-  rect(width/10 *7, haaight, width/10 *7.5, haaight*3);
+  let haaight = height / 17;
+  rect(width / 10, haaight, width / 10 + width / 5, haaight * 3);
+  rect((width / 10) * 7, haaight, (width / 10) * 9, haaight * 3);
+
+  rect(width / 10, haaight, (width / 10 + width / 5) / 2, haaight * 3);
+  rect((width / 10) * 7, haaight, (width / 10) * 7.5, haaight * 3);
   pop();
+  
+  noFill();
+  //rect(0,height/20 *16, 400, height);
 }
 
 function updateTeam1Score() {
@@ -158,12 +168,13 @@ function updateTeam2Score() {
 }
 
 function updateTime() {
-  if (playing && !paused) {
+  if (playing && !paused && frameCount % 60 == 0) {
     seconds += 1;
     if (seconds >= 60) {
       minutes += 1;
       seconds = 0;
     }
+    let formattedTime = nf(minutes, 2) + ":" + nf(seconds, 2);
     periodPlaying = true;
   }
 }
@@ -187,6 +198,15 @@ function togglePlaying() {
     print("Timer start.");
     pauseTime();
     playButton.html("▶️");
+  }
+}
+
+function togglePeriod() {
+  if (period == 1) {
+    period = 2;
+  }
+  else {
+    period = 1;
   }
 }
 
@@ -214,12 +234,14 @@ function stopTime() {
 }
 
 function mousePressed() {
-  var distanceScores = (width / 2) / 5;
-  var heightFouls = (height/17);
-  
+  var heightScores = height / 20
+  var distanceScores = width / 2 / 5;
+  var heightFouls = height / 17;
+  var heightPeriod = height/20 *17;
+  var distancePeriod = width/9;
+
   // SCORES
-  if (mouseY > 206 && mouseY < 638) {
-    
+  if (mouseY > height/20 *7 && mouseY < height/20*15) {
     if (mouseX > 0 && mouseX < distanceScores) {
       team1Score -= 1;
       win = false;
@@ -238,24 +260,51 @@ function mousePressed() {
     }
   }
   // FALTAS
-  if (mouseY > heightFouls && mouseY < heightFouls*3) {
-    if (mouseX > width/10 && mouseX < (width/10+width/5)/2){
+  if (mouseY > heightFouls && mouseY < heightFouls * 3) {
+    if (mouseX > width / 10 && mouseX < (width / 10 + width / 5) / 2) {
       team1Fouls -= 1;
-      print('Hey');
-    }
-    else if (mouseX > (width/10+width/5)/2 && mouseX < width/10+width/5){
-      team1Fouls += 1;  
-      print('No hey!');
-    }
-    else if (mouseX > width/10 *7 && mouseX < width/10 *7.5) {
+    } else if (
+      mouseX > (width / 10 + width / 5) / 2 &&
+      mouseX < width / 10 + width / 5
+    ) {
+      team1Fouls += 1;
+    } else if (mouseX > (width / 10) * 7 && mouseX < (width / 10) * 7.5) {
       team2Fouls -= 1;
+    } else if (mouseX > (width / 10) * 7.5 && mouseX < (width / 10) * 9) {
+      team2Fouls += 1;
     }
-    else if (mouseX > width/10 *7.5 && mouseX < width/10 *9) {
-      team2Fouls +=1;
-    }
-  
-
-  
   }
-
+  
+  // PERIOD
+  if (mouseY > heightPeriod && mouseY < height){
+    if (mouseX > width/2 - distancePeriod && mouseX < width/2 + distancePeriod){
+      togglePeriod();
+    }
+  }
 }
+
+
+
+/*
+Aquí vamos
+
+function touchStarted() {
+  // Comprueba si hay toques en la pantalla y si se ha tocado uno de los botones
+  if (touches && touches[0]) {
+    // Botón 1: cambia el color de fondo
+    if (dist(touches[0].x, touches[0].y, width/3, height/2) < 25) {
+      backgroundColor = color(random(255), random(255), random(255));
+    }
+    
+    // Botón 2: cambia el color del círculo
+    if (dist(touches[0].x, touches[0].y, width/3 *2, height/2) < 25) {
+      backgroundColor = color(random(255), random(255), random(255));
+    }
+  }
+  
+  // Asegurémonos de que el evento touchStarted no se propague
+  return false;
+}
+
+
+*/
