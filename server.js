@@ -5,7 +5,11 @@ var app = express();
 var server = app.listen(PORT);
 
 app.use(express.static('public'));
-app.use(cors()); // Enable cors for all routes
+//app.use(cors()); // Enable cors for all routes
+// Enable cors for a specific domain
+app.use(cors({
+    origin: 'https://screenscores-cg.herokuapp.com'
+    }));
 console.log("My socket server is running");
 
 var socket = require('socket.io');
