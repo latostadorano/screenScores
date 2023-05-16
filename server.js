@@ -4,6 +4,14 @@ var app = express();
 var server = app.listen(PORT);
 
 app.use(express.static('public'));
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+
+  
 console.log("My socket server is running");
 
 var socket = require('socket.io');
