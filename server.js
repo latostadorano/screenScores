@@ -9,14 +9,19 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
-  });
+});
 
   
 console.log("My socket server is running");
 
 var socket = require('socket.io');
 
-var io = socket(server);
+var io = socket(server, {
+    cors: {
+      origin: "https://screenscores-cg.herokuapp.com",
+      methods: ["GET", "POST"]
+    }
+  });
 
 io.sockets.on('connection', newConnection);
 
